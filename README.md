@@ -5,7 +5,7 @@
 ## نصب
 
 ```bash
-AHB_REPO=OWNER/REPO bash <(curl -fsSL https://raw.githubusercontent.com/OWNER/REPO/main/install.sh)
+AHB_REPO=sajaf47/Ahbsub bash <(curl -fsSL https://raw.githubusercontent.com/sajaf47/Ahbsub/main/install.sh)
 ```
 
 بعد از نصب، لینک ساب هر کاربر را در مرورگر باز کنید. کلاینت‌های VPN همچنان خروجی معمولی را می‌گیرند.
@@ -13,14 +13,14 @@ AHB_REPO=OWNER/REPO bash <(curl -fsSL https://raw.githubusercontent.com/OWNER/RE
 ## حذف
 
 ```bash
-AHB_REPO=OWNER/REPO bash <(curl -fsSL https://raw.githubusercontent.com/OWNER/REPO/main/install.sh) uninstall
+AHB_REPO=OWNER/REPO bash <(curl -fsSL https://raw.githubusercontent.com/sajaf47/Ahbsub/main/install.sh) uninstall
 ```
 
 ## نصب دستی
 
 ```bash
 sudo mkdir -p /var/lib/pasarguard/templates/subscription
-sudo wget -O /var/lib/pasarguard/templates/subscription/ahb.html https://raw.githubusercontent.com/OWNER/REPO/main/index.html
+sudo wget -O /var/lib/pasarguard/templates/subscription/ahb.html https://raw.githubusercontent.com/sajaf47/Ahbsub/main/index.html
 ```
 
 در `/opt/pasarguard/.env`:
