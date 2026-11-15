@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08100d">
+<title>{{ user.username }} | AHB PANEL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script>
+window.__SUB__ = {
+  username: {{ (user.username or '') | tojson }},
+  status: {{ ((user.status.value if user.status.value is defined else user.status) or 'active') | string | tojson }},
+  used: {{ (user.used_traffic or 0) | int }},
+  limit: {{ (user.data_limit or 0) | int }},
+  expire: {% set e = user.expire %}{% if not e %}0{% elif e.timestamp is defined %}{{ e.timestamp() | int }}{% else %}{{ e | int }}{% endif %},
+  subUrl: {{ (user.subscription_url or user.sub_url or '') | tojson }},
+  links: {{ (user.links or []) | tojson }}
+};
+</script>
+{% raw %}
+<style>
+*{box-sizing:border-box}
+:root{--bg:#08100d;--card:#101a16;--line:rgba(255,255,255,.07);--tx:#f3f7f5;--mu:#9bb0a7;--gold1:#f1cf6b;--gold2:#b8821a}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:'Vazirmatn',system-ui,sans-serif}
+body{min-height:100vh;padding:max(14px,env(safe-area-inset-top)) 12px calc(26px + env(safe-area-inset-bottom));background:radial-gradient(800px 460px at 85% -8%,var(--glow2,rgba(52,211,153,.10)),transparent 62%),var(--bg)}
+.wrap{max-width:560px;margin:auto;display:grid;gap:14px}
+.wrap[data-s=ok]{--a:#34d399;--h1:#1f6c4c;--h2:#04382b;--rg:#e8c15a;--bd:rgba(214,176,80,.38);--l1:#63e987;--l2:#17a34a;--glow2:rgba(52,211,153,.12)}
+.wrap[data-s=low]{--a:#fbbf24;--h1:#7a5412;--h2:#2f1e04;--rg:#fbbf24;--bd:rgba(251,191,36,.4);--l1:#fcd34d;--l2:#d97706;--glow2:rgba(251,191,36,.10)}
+.wrap[data-s=bad]{--a:#ff6f66;--h1:#7d2024;--h2:#2a0a10;--rg:#ff6f66;--bd:rgba(255,111,102,.45);--l1:#ff8a80;--l2:#d4453d;--glow2:rgba(255,90,80,.10)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:30px;padding:20px}
+.hero{position:relative;overflow:hidden;border:1px solid var(--bd);border-radius:38px 72px 38px 72px;background:linear-gradient(160deg,var(--h1),var(--h2) 78%);padding:24px 22px 128px;transition:.4s}
+.hg{position:relative;z-index:2;display:grid;grid-template-columns:1fr 172px;gap:8px;align-items:center}
+.shield{width:74px;height:84px;border-radius:30px 30px 38px 38px;border:1px solid var(--bd);background:rgba(255,255,255,.04);display:grid;place-items:center;color:var(--rg);animation:pulse 3.2s ease-in-out infinite}
+.ttl{display:flex;align-items:center;gap:10px;margin:14px 0 6px}
+.ttl h1{margin:0;font-size:26px;line-height:1.25;font-weight:900}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--a);box-shadow:0 0 0 0 var(--a);animation:ping 2s infinite;flex:none}
+.hero p{margin:0 0 16px;font-size:15px;line-height:1.9;color:#c5d3cd}
+.gold{display:inline-flex;align-items:center;gap:9px;border:0;cursor:pointer;font:inherit;font-weight:900;font-size:15px;color:#1b1303;padding:13px 24px;border-radius:999px;background:linear-gradient(120deg,var(--gold1),var(--gold2));box-shadow:0 10px 30px rgba(214,176,80,.28);animation:glow 2.8s ease-in-out infinite}
+.rw{display:grid;justify-items:center;gap:14px}
+.ring{position:relative;width:172px;height:172px}
+.ring svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.rt{fill:none;stroke:rgba(255,255,255,.08);stroke-width:10}
+.rp{fill:none;stroke:var(--rg);stroke-width:10;stroke-linecap:round;stroke-dasharray:439.82;stroke-dashoffset:439.82;animation:draw 1.6s cubic-bezier(.2,.8,.2,1) both;filter:drop-shadow(0 0 7px var(--rg))}
+.rin{fill:rgba(0,0,0,.28);stroke:var(--bd);stroke-width:1.5}
+.rdash{fill:none;stroke:rgba(255,255,255,.22);stroke-dasharray:4 5;animation:rot 40s linear infinite;transform-origin:86px 86px}
+.orb{position:absolute;inset:0;animation:spin 9s linear infinite}
+.orb:before{content:"";position:absolute;top:9px;left:50%;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#fff3c4;box-shadow:0 0 14px 4px rgba(255,236,160,.65)}
+.rc{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.rc b{font-size:62px;line-height:1;font-weight:900;color:var(--rg);letter-spacing:-1px}.rc b small{font-size:25px;letter-spacing:0}
+.rc span{font-size:16px;color:#c5d3cd;margin-top:6px}
+.days{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--rg)}
+.waves{position:absolute;left:0;bottom:0;width:200%;height:120px;direction:ltr;pointer-events:none}
+.waves svg{position:absolute;left:0;bottom:0;width:100%;height:100%}
+.w1{animation:wv 14s linear infinite}.w2{animation:wv 9s linear infinite reverse}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);text-align:center;padding:26px 8px}
+.stats div{font-size:13px;color:var(--mu)}.stats b{display:block;margin-top:14px;font-size:19px;color:var(--tx);direction:ltr;font-weight:800}
+.stats .g b{color:#4ade80}
+.th{display:flex;align-items:center;gap:12px;font-size:19px;font-weight:800}
+.ib{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;background:rgba(255,255,255,.05);color:var(--a)}
+.big{margin:14px 0 18px;font-size:40px;font-weight:900;color:var(--a);direction:ltr;text-align:right}
+.tank{position:relative;height:210px;border-radius:30px;overflow:hidden;background:rgba(255,255,255,.04);border:1px solid var(--bd)}
+.liq{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(180deg,var(--l1),var(--l2));animation:rise 1.8s cubic-bezier(.2,.8,.2,1) both}
+.lw{position:absolute;left:0;top:-15px;width:200%;height:16px;direction:ltr;animation:wv 5s linear infinite}
+.lw svg{width:100%;height:100%;display:block}
+.tick{position:absolute;left:14px;width:34px;height:2px;border-radius:2px;background:rgba(255,255,255,.35)}
+.bub{position:absolute;bottom:-10px;border-radius:50%;border:1.5px solid rgba(255,255,255,.55);animation:bub 6s linear infinite}
+.tc{position:absolute;inset:0;display:grid;place-content:center;text-align:center;z-index:2;text-shadow:0 2px 12px rgba(0,0,0,.35)}
+.tc b{font-size:46px;font-weight:900;line-height:1}.tc b small{font-size:20px}.tc span{font-size:15px;margin-top:8px;color:#e9fff1}
+.tc .warn{width:62px;height:62px;border-radius:50%;border:1.5px solid var(--a);display:grid;place-items:center;margin:0 auto 10px;color:var(--a)}
+.tc .bad{color:var(--a);font-size:20px;font-weight:800}
+.sec{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.sec h2{margin:0;font-size:16px}.sec span{font-size:10px;color:var(--mu)}
+.f{display:flex;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:15px;background:rgba(255,255,255,.035);border:1px solid var(--line);margin-bottom:8px}
+.f i{font-style:normal;color:var(--mu);font-size:12px}.f b{font-size:12px;direction:ltr;word-break:break-all}
+.lr{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px;border-radius:16px;background:rgba(255,255,255,.035);border:1px solid var(--line);margin-top:10px}
+.lt{font:10px/1.8 ui-monospace,Consolas,monospace;color:#9fe3c4;direction:ltr;text-align:left;word-break:break-all}
+.cfg{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;padding:12px;border-radius:16px;background:rgba(255,255,255,.035);border:1px solid var(--line);margin-top:10px}.cn{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.06);color:var(--a);font-size:12px;font-weight:800}.cm{min-width:0}.cm b{display:block;font-size:12px;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cm .lt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9px}.btn.sm{padding:9px 12px}.btn.alt{background:#26332e;color:#fff}
+.btn{border:0;border-radius:13px;padding:11px 15px;font:inherit;font-size:12px;font-weight:800;cursor:pointer;color:#06221a;background:linear-gradient(120deg,#4ade80,#22b8a0)}
+.ft{text-align:center;color:#68807a;font-size:11px;padding:8px 0}
+.modal{position:fixed;inset:0;z-index:50;display:none;place-items:center;padding:18px;background:rgba(0,0,0,.78);backdrop-filter:blur(10px)}.modal.show{display:grid}
+.mc{width:min(340px,100%);padding:22px;border-radius:26px;background:#0d1713;border:1px solid var(--line);text-align:center}
+#qr-modal{display:inline-block;background:#fff;padding:10px;border-radius:16px;line-height:0;margin:12px 0}
+@keyframes wv{to{transform:translateX(-50%)}}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes rot{to{transform:rotate(360deg)}}
+@keyframes draw{from{stroke-dashoffset:439.82}}
+@keyframes rise{from{height:0}}
+@keyframes bub{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(-190px);opacity:0}}
+@keyframes ping{70%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 0 transparent}}
+@keyframes pulse{50%{box-shadow:0 0 26px 2px var(--bd)}}
+@keyframes glow{50%{box-shadow:0 10px 38px rgba(214,176,80,.5)}}
+@media(max-width:380px){.hg{grid-template-columns:1fr 140px}.ring{width:140px;height:140px}.rc b{font-size:50px}.ttl h1{font-size:22px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap" data-s="ok">
+
+<section class="hero">
+  <div class="hg">
+    <div>
+      <div class="shield" id="shield"></div>
+      <div class="ttl"><i class="dot"></i><h1 id="title"></h1></div>
+      <p id="subt"></p>
+      <button class="gold" type="button" onclick="openQr(subUrl)"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="m13 2-8.5 11H11l-1 9 8.5-11H12z"/></svg>اتصال سریع</button>
+    </div>
+    <div class="rw">
+      <div class="ring">
+        <svg viewBox="0 0 172 172"><circle cx="86" cy="86" r="84" fill="rgba(255,255,255,.03)"/><circle class="rt" cx="86" cy="86" r="70"/><circle class="rp" id="rp" cx="86" cy="86" r="70"/><circle class="rin" cx="86" cy="86" r="62"/><circle class="rdash" cx="86" cy="86" r="55"/></svg>
+        <div class="orb"></div>
+        <div class="rc"><div><b><span id="usedPct">0</span><small>%</small></b><span>مصرف شده</span></div></div>
+      </div>
+      <div class="days"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg><span id="days"></span></div>
+    </div>
+  </div>
+  <div class="waves">
+    <svg class="w1" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 70 q75 -55 150 0 t150 0 t150 0 t150 0 t150 0 t150 0 t150 0 t150 0 V120 H0Z" fill="rgba(255,255,255,.07)"/></svg>
+    <svg class="w2" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 78 q75 -40 150 0 t150 0 t150 0 t150 0 t150 0 t150 0 t150 0 t150 0" fill="none" stroke="var(--a)" stroke-opacity=".75" stroke-width="3"/></svg>
+  </div>
+</section>
+
+<section class="card stats">
+  <div>حجم سرویس<b id="sTotal"></b></div>
+  <div>حجم مصرفی<b id="sUsed"></b></div>
+  <div class="g">حجم باقی مانده<b id="sRemain"></b></div>
+</section>
+
+<section class="card">
+  <div class="th"><span class="ib"><svg id="tankIcon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"></svg></span>حجم باقی‌مانده</div>
+  <div class="big" id="big"></div>
+  <div class="tank">
+    <div class="liq" id="liq"><div class="lw"><svg viewBox="0 0 400 16" preserveAspectRatio="none"><path d="M0 8 q25 -14 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 V16 H0Z" style="fill:var(--l1)"/></svg></div></div>
+    <i class="tick" style="top:28px"></i><i class="tick" style="top:68px;width:26px"></i><i class="tick" style="top:108px;width:40px"></i><i class="tick" style="top:148px;width:26px"></i><i class="tick" style="top:188px"></i>
+    <i class="bub" style="left:26%;width:12px;height:12px"></i><i class="bub" style="left:58%;width:8px;height:8px;animation-delay:2s"></i><i class="bub" style="left:78%;width:10px;height:10px;animation-delay:4s"></i>
+    <div class="tc"><div id="tankCenter"></div></div>
+  </div>
+</section>
+
+<section class="card">
+  <div class="sec"><h2>اطلاعات اتصال</h2><span>Connection Info</span></div>
+  <div class="f"><i>نام کاربری</i><b id="iUser"></b></div>
+  <div class="f"><i>آدرس سرور</i><b id="iHost"></b></div>
+  <div class="f"><i>وضعیت</i><b id="iStatus"></b></div>
+</section>
+
+<section class="card">
+  <div class="sec"><h2>لینک اشتراک</h2><span>Subscription</span></div>
+  <div class="lr"><div class="lt" id="subText"></div><button class="btn" onclick="copyText('subText',this)">کپی لینک</button></div>
+</section>
+
+<section class="card" id="cfgCard">
+  <div class="sec"><h2>کانفیگ‌ها</h2><span id="cfgCount"></span></div>
+  <div id="cfgList"></div>
+  <button class="btn" style="width:100%;margin-top:12px" onclick="copyAll(this)">کپی همه‌ی کانفیگ‌ها</button>
+</section>
+
+<div class="ft">AHB PANEL</div>
+</div>
+
+<div id="modal" class="modal" onclick="if(event.target===this)closeQr()"><div class="mc"><h3 style="margin:0 0 4px">QR Code</h3><p style="font-size:11px;color:#9bb0a7;margin:0">در برنامه‌ی کلاینت اسکن کنید یا کپی کنید</p><div id="qr-modal"></div><br><button class="btn" onclick="copyRaw(curQr,this)">کپی</button> <button class="btn alt" onclick="closeQr()">بستن</button></div></div>
+
+<script>
+const D=window.__SUB__,$=id=>document.getElementById(id);
+const subUrl=D.subUrl||(location.origin+location.pathname),cfgs=(D.links||[]).filter(Boolean);let curQr=subUrl;
+
+/* ---------- helpers ---------- */
+function fmtBytes(n){n=+n||0;const u=['B','KB','MB','GB','TB'];let i=0;while(n>=1024&&i<4){n/=1024;i++}return (i?n.toFixed(2).replace(/\.?0+$/,''):String(n))+' '+u[i]}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fb(t,done){const a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}document.body.removeChild(a);done()}
+function copyRaw(t,btn){const done=()=>{const o=btn.textContent;btn.textContent='✓ کپی شد';setTimeout(()=>btn.textContent=o,1400)};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done).catch(()=>fb(t,done));else fb(t,done)}
+function copyText(id,btn){const el=$(id);if(el)copyRaw(el.textContent.trim(),btn)}
+function copyAll(btn){copyRaw(cfgs.join('\n'),btn)}
+function openQr(t){curQr=t;$('modal').classList.add('show');const b=$('qr-modal');b.innerHTML='';try{const q=qrcode(0,'M');q.addData(t);q.make();b.innerHTML=q.createImgTag(5,8)}catch(e){b.textContent='QR unavailable'}}
+function closeQr(){$('modal').classList.remove('show')}
+
+/* ---------- state ---------- */
+const SH_OK='<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.2 7.5 9.5 4.4-1.3 7.5-4.9 7.5-9.5V6z"/><path d="m8.8 12 2.4 2.4 4.2-4.6"/></svg>';
+const SH_BAD='<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.4v.1"/></svg>';
+const IC_DB='<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>';
+const IC_WARN='<path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.4v.1"/>';
+const STATUS_FA={active:'فعال',disabled:'غیرفعال',limited:'اتمام حجم',expired:'منقضی',on_hold:'در انتظار اتصال'};
+
+(function render(){
+  const used=Math.max(0,+D.used||0),limit=Math.max(0,+D.limit||0),unlimited=limit<=0;
+  const usedPct=unlimited?0:Math.max(0,Math.min(100,Math.round(used/limit*1000)/10));
+  const remainPct=100-usedPct;
+  const st=String(D.status||'active').toLowerCase();
+
+  let exhausted=(!unlimited&&used>=limit)||st==='limited';
+  let expired=st==='expired',daysText='بدون محدودیت زمان';
+  if(D.expire>0){
+    const secs=Math.floor(D.expire-Date.now()/1000);
+    if(secs<=0){expired=true;daysText='منقضی شده'}
+    else{const d=Math.floor(secs/86400),h=Math.floor(secs%86400/3600),m=Math.floor(secs%3600/60);daysText=d?d+' روز':h?h+' ساعت':m+' دقیقه'}
+  }
+  let state,title,subt;
+  if(exhausted){state='bad';title='حجم به اتمام رسیده';subt='برای ادامه استفاده، حجم سرویس را تمدید کنید'}
+  else if(expired){state='bad';title='سرویس منقضی شده';subt='برای ادامه استفاده، سرویس را تمدید کنید'}
+  else if(st==='disabled'){state='bad';title='سرویس غیرفعال';subt='این سرویس در حال حاضر غیرفعال است'}
+  else if(!unlimited&&remainPct<=10){state='low';title='حجم رو به اتمام';subt='کمتر از ۱۰٪ از حجم شما باقی مانده است'}
+  else if(st==='on_hold'){state='ok';title='آماده اتصال';subt='سرویس شما پس از اولین اتصال فعال می‌شود'}
+  else{state='ok';title='متصل و فعال';subt='اتصال امن شما آماده استفاده است'}
+
+  let fill,center;
+  if(exhausted){fill=4;center='<div class="warn"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">'+IC_WARN+'</svg></div><div class="bad">به اتمام رسیده</div>'}
+  else if(unlimited){fill=100;center='<b>∞</b><span>نامحدود</span>'}
+  else{fill=remainPct;center='<b>'+(+remainPct.toFixed(1))+'<small>%</small></b><span>باقی مانده</span>'}
+
+  const totalT=unlimited?'نامحدود':fmtBytes(limit),remainT=unlimited?'نامحدود':fmtBytes(Math.max(0,limit-used));
+  $('wrap').dataset.s=state;
+  $('shield').innerHTML=state==='ok'?SH_OK:SH_BAD;
+  $('title').textContent=title;$('subt').textContent=subt;
+  $('rp').style.strokeDashoffset=(439.82*(1-usedPct/100)).toFixed(2);
+  $('days').textContent=daysText;
+  $('sTotal').textContent=totalT;$('sUsed').textContent=fmtBytes(used);$('sRemain').textContent=remainT;
+  $('big').textContent=remainT;
+  $('tankIcon').innerHTML=exhausted?IC_WARN:IC_DB;
+  $('liq').style.height=fill+'%';
+  $('tankCenter').innerHTML=center;
+  $('iUser').textContent=D.username;$('iHost').textContent=location.hostname;
+  $('iStatus').textContent=STATUS_FA[st]||st;
+  $('subText').textContent=subUrl;
+
+  /* configs */
+  $('cfgCount').textContent=cfgs.length+' کانفیگ';
+  if(!cfgs.length){$('cfgCard').querySelector('.btn').style.display='none';$('cfgList').innerHTML='<div class="f"><i>کانفیگی در دسترس نیست</i></div>'}
+  else{
+    $('cfgList').innerHTML=cfgs.map((u,i)=>{
+      let remark='Config '+(i+1);
+      if(u.indexOf('#')>-1){try{remark=decodeURIComponent(u.split('#').slice(1).join('#'))}catch(e){remark=u.split('#').slice(1).join('#')}}
+      return '<div class="cfg"><span class="cn">'+(i+1)+'</span><div class="cm"><b>'+esc(remark)+'</b><div class="lt" id="cfg'+i+'">'+esc(u)+'</div></div>'+
+        '<button class="btn sm" onclick="copyText(\'cfg'+i+'\',this)">کپی</button>'+
+        '<button class="btn sm alt" onclick="openQr($(\'cfg'+i+'\').textContent.trim())">QR</button></div>';
+    }).join('');
+  }
+
+  /* count-up of the % number */
+  const el=$('usedPct');
+  if(usedPct>0){const t0=performance.now();(function s(t){const p=Math.min(1,(t-t0)/1400);el.textContent=+(usedPct*(1-Math.pow(1-p,3))).toFixed(1);if(p<1)requestAnimationFrame(s)})(t0)}
+})();
+</script>
+</body>
+</html>
+{% endraw %}
